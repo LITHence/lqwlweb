@@ -177,6 +177,21 @@ const createApi = (workerUrl, cookie) => {
     // 提交作业
     submitQuiz: (instantId, feedback = "") =>
       put("/api/quiz/submitQuiz", { instant_id: instantId, feedback }),
+    // -- 模考 (quCent) 专用端点 --
+    getQuCentContent: (instantId) =>
+      put(`/api/quiz/getConentAllSection/qucent/preload?instant_id=${instantId}`, {}),
+    saveQuCentOne: (instantId, cIndex, answerKeys = [], fileList = []) =>
+      put("/api/quiz/saveQuizOne/qucent", {
+        instant_id: instantId, cIndex, answerKeys, fileList,
+      }),
+    submitQuCent: (instantId, feedback = "") =>
+      put("/api/quiz/submitQuiz/quCent", { instant_id: instantId, feedback }),
+    quCentTimeUsage: (instantId, cIndex, usage) =>
+      post("/api/quiz/quCent/timeUsage", { instant_id: instantId, cIndex, usage }),
+    getQuizInstant: (instantId) =>
+      get(`/api/quiz/instant?instant_id=${instantId}`),
+    getQuizStatusSync: (instantId) =>
+      get(`/api/quiz/status/sync?instant_id=${instantId}`),
     // 获取上传 URL
     getUploadUrl: (ext = ".png") => get(`/api/users/uploadUrl?extend=${ext}`),
     // 通过 Worker 代理上传到 COS（绕过 CORS）
@@ -585,6 +600,9 @@ function ApiDebugger({ workerUrl, cookie }) {
     { label: "拉取题目(PUT)", path: "/api/quiz/getConentAllSection?instant_id=" },
     { label: "获取上传URL", path: "/api/users/uploadUrl?extend=.png" },
     { label: "AI错误颜色", path: "/api/quiz/ai-errorColor" },
+    { label: "模考内容(PUT)", path: "/api/quiz/getConentAllSection/qucent/preload?instant_id=" },
+    { label: "模考状态同步", path: "/api/quiz/status/sync?instant_id=" },
+    { label: "模考实例", path: "/api/quiz/instant?instant_id=" },
   ];
 
   const send = async () => {
@@ -812,9 +830,9 @@ const tdStyle = {
  */
 const QUIZ_TYPE_MAP = {
   "custom-subject":   { label: "自定义", color: "#8b8bf5" },
-  "quCent-homework":  { label: "趣测作业", color: "#f59e0b" },
-  "quCent-exam":      { label: "趣测考试", color: "#ef4444" },
-  "quCent-typeIn":    { label: "趣测录入", color: "#f97316" },
+  "quCent-homework":  { label: "模考作业", color: "#f59e0b" },
+  "quCent-exam":      { label: "模考", color: "#ef4444" },
+  "quCent-typeIn":    { label: "模考录入", color: "#f97316" },
   "ai-writing":       { label: "AI写作", color: "#22d3ee" },
   "ai-speaking":      { label: "AI口语", color: "#a78bfa" },
   "toefl":            { label: "托福", color: "#3b82f6" },
@@ -908,15 +926,25 @@ function QuizWorkspace({ quiz, api, onClose, onSubmitted }) {
   const [statusMsg, setStatusMsg] = useState("");
 
   const instantId = quiz._id;
+  const isQuCent = (quiz.type || "").startsWith("quCent");
 
   // 加载题目
   useEffect(() => {
     (async () => {
       try {
         setLoading(true);
-        const data = await api.getQuizContent(instantId);
+        const data = isQuCent
+          ? await api.getQuCentContent(instantId)
+          : await api.getQuizContent(instantId);
         setContent(data);
-        if (data.savedAnswers) {
+        // 预填已保存答案
+        if (isQuCent && Array.isArray(data.answers)) {
+          const pre = {};
+          data.answers.forEach(a => {
+            pre[a.cIndex] = { answerKey: (a.answerKeys || []).join("\n"), fileList: a.fileList || [] };
+          });
+          setAnswers(pre);
+        } else if (data.savedAnswers) {
           const pre = {};
           for (const [cid, ans] of Object.entries(data.savedAnswers)) {
             pre[cid] = { answerKey: ans.answerKey || "", fileList: ans.fileList || [] };
@@ -929,14 +957,19 @@ function QuizWorkspace({ quiz, api, onClose, onSubmitted }) {
         setLoading(false);
       }
     })();
-  }, [instantId, api]);
+  }, [instantId, api, isQuCent]);
 
   // 保存单题
   const saveOne = async (contentId) => {
     const ans = answers[contentId] || { answerKey: "", fileList: [] };
     setSaving(true); setStatusMsg("保存中…");
     try {
-      await api.saveQuizOne(instantId, contentId, ans.answerKey, ans.fileList);
+      if (isQuCent) {
+        const keys = ans.answerKey ? ans.answerKey.split("\n").filter(Boolean) : [];
+        await api.saveQuCentOne(instantId, contentId, keys, ans.fileList);
+      } else {
+        await api.saveQuizOne(instantId, contentId, ans.answerKey, ans.fileList);
+      }
       setStatusMsg("✓ 已保存");
     } catch (e) { setStatusMsg("保存失败: " + e.message); }
     finally { setSaving(false); }
@@ -951,12 +984,11 @@ function QuizWorkspace({ quiz, api, onClose, onSubmitted }) {
       const urlData = await api.getUploadUrl(ext);
 
       setStatusMsg("上传中…");
-      // 通过 Worker 代理上传到 COS
       const uploadRes = await api.proxyUpload(urlData.uploadURL, file);
       if (!uploadRes.ok) throw new Error("上传失败 " + uploadRes.status);
 
       const fileEntry = {
-        name: "学生作答图片",
+        name: file.name || "学生作答图片",
         url: urlData.imageURL,
         fileType: file.type,
         size: file.size,
@@ -966,7 +998,11 @@ function QuizWorkspace({ quiz, api, onClose, onSubmitted }) {
         ...prev,
         [contentId]: { answerKey: prev[contentId]?.answerKey || "", fileList: newFileList },
       }));
-      await api.saveQuizOne(instantId, contentId, answers[contentId]?.answerKey || "", newFileList);
+      if (isQuCent) {
+        await api.saveQuCentOne(instantId, contentId, [], newFileList);
+      } else {
+        await api.saveQuizOne(instantId, contentId, answers[contentId]?.answerKey || "", newFileList);
+      }
       setStatusMsg("✓ 图片已上传并保存");
     } catch (e) {
       setStatusMsg("上传失败: " + e.message);
@@ -978,16 +1014,29 @@ function QuizWorkspace({ quiz, api, onClose, onSubmitted }) {
     if (!confirm("确认提交？提交后无法修改。")) return;
     setSubmitting(true); setStatusMsg("提交中…");
     try {
-      const sections = content?.quiz?.sections || [];
-      for (const sec of sections) {
-        for (const item of sec.content || []) {
-          const cid = item.content?._id;
-          if (cid && answers[cid] && (answers[cid].answerKey || answers[cid].fileList?.length)) {
-            await api.saveQuizOne(instantId, cid, answers[cid].answerKey, answers[cid].fileList || []);
+      if (isQuCent) {
+        // 保存所有有内容的答案
+        const qcQuestions = content?.quiz?.quCentQuestionExtends || [];
+        for (const q of qcQuestions) {
+          const ans = answers[q.cIndex];
+          if (ans && (ans.answerKey || ans.fileList?.length)) {
+            const keys = ans.answerKey ? ans.answerKey.split("\n").filter(Boolean) : [];
+            await api.saveQuCentOne(instantId, q.cIndex, keys, ans.fileList || []);
           }
         }
+        await api.submitQuCent(instantId, feedback);
+      } else {
+        const sections = content?.quiz?.sections || [];
+        for (const sec of sections) {
+          for (const item of sec.content || []) {
+            const cid = item.content?._id;
+            if (cid && answers[cid] && (answers[cid].answerKey || answers[cid].fileList?.length)) {
+              await api.saveQuizOne(instantId, cid, answers[cid].answerKey, answers[cid].fileList || []);
+            }
+          }
+        }
+        await api.submitQuiz(instantId, feedback);
       }
-      await api.submitQuiz(instantId, feedback);
       setStatusMsg("✓ 提交成功！");
       setTimeout(() => onSubmitted?.(), 1000);
     } catch (e) { setStatusMsg("提交失败: " + e.message); }
@@ -1041,6 +1090,8 @@ function QuizWorkspace({ quiz, api, onClose, onSubmitted }) {
   const isSubmitted = content?.status === "2" || content?.status === "3";
   const quizTitle = content?.quiz?.title || content?.quiz?.name || quiz.quiz?.title || "作业";
   const teacher = content?.quiz?.teacher || "";
+  const quCentQuestions = content?.quiz?.quCentQuestionExtends || [];
+  const paperUrl = content?.quiz?.renderDataUrl || "";
 
   return (
     <div style={sty.overlay}>
@@ -1071,7 +1122,79 @@ function QuizWorkspace({ quiz, api, onClose, onSubmitted }) {
         {loading && <div style={{ color: "var(--text2)", textAlign: "center", padding: "60px" }}>加载题目中…</div>}
         {error && <div style={{ color: "#ef4444", textAlign: "center", padding: "40px" }}>{error}</div>}
 
-        {!loading && !error && sections.map((sec, si) => (
+        {!loading && !error && isQuCent && (
+          <div style={{ display: "flex", flexDirection: "column", gap: "16px" }}>
+            {paperUrl && (
+              <div style={sty.card}>
+                <div style={{ fontSize: "11px", color: "var(--text3)", marginBottom: "8px" }}>试卷原件</div>
+                <a href={paperUrl} target="_blank" rel="noopener"
+                  style={{ color: "var(--accent)", fontSize: "13px", textDecoration: "none" }}>
+                  📄 查看试卷 →
+                </a>
+              </div>
+            )}
+            {quCentQuestions.map((q) => {
+              const cid = q.cIndex;
+              const ans = answers[cid] || { answerKey: "", fileList: [] };
+              return (
+                <div key={cid} style={sty.card}>
+                  <div style={{ display: "flex", justifyContent: "space-between", marginBottom: "10px", flexWrap: "wrap", gap: "4px" }}>
+                    <span style={{ fontSize: "13px", fontWeight: 600, color: "var(--text)" }}>
+                      题 {cid}
+                    </span>
+                    <span style={{ fontSize: "11px", color: "var(--text3)" }}>
+                      {q.qType} · {q.maxScore}分
+                    </span>
+                  </div>
+                  <textarea
+                    value={ans.answerKey}
+                    onChange={e => setAnswers(prev => ({
+                      ...prev,
+                      [cid]: { answerKey: e.target.value, fileList: prev[cid]?.fileList || [] },
+                    }))}
+                    placeholder={isSubmitted ? "（已提交）" : "输入答案…"}
+                    disabled={isSubmitted}
+                    style={sty.textarea}
+                  />
+                  {ans.fileList?.length > 0 && (
+                    <div style={{ display: "flex", gap: "8px", marginTop: "10px", flexWrap: "wrap" }}>
+                      {ans.fileList.map((f, fi) => (
+                        <div key={fi} style={{ position: "relative" }}>
+                          <img src={f.url} alt={f.name} style={{
+                            width: "80px", height: "80px", borderRadius: "8px", objectFit: "cover",
+                            border: "1px solid var(--border)",
+                          }} />
+                          {!isSubmitted && (
+                            <button onClick={() => removeFile(cid, fi)} style={{
+                              position: "absolute", top: "-6px", right: "-6px",
+                              width: "18px", height: "18px", borderRadius: "50%",
+                              background: "#ef4444", border: "none", color: "#fff",
+                              fontSize: "10px", cursor: "pointer", lineHeight: "18px", textAlign: "center",
+                            }}>✕</button>
+                          )}
+                        </div>
+                      ))}
+                    </div>
+                  )}
+                  {!isSubmitted && (
+                    <div style={{ display: "flex", gap: "8px", marginTop: "12px" }}>
+                      <button onClick={() => saveOne(cid)} disabled={saving} style={sty.btn("#c08552", saving)}>
+                        {saving ? "保存中…" : "💾 保存"}
+                      </button>
+                      <label style={{ ...sty.btn("#22d3ee", !!uploadingFor), display: "inline-flex", alignItems: "center", gap: "4px", cursor: uploadingFor ? "not-allowed" : "pointer" }}>
+                        {uploadingFor === cid ? "上传中…" : "📷 上传图片"}
+                        <input type="file" accept="image/*" style={{ display: "none" }} disabled={!!uploadingFor}
+                          onChange={e => { const f = e.target.files?.[0]; if (f) handleImageUpload(cid, f); e.target.value = ""; }} />
+                      </label>
+                    </div>
+                  )}
+                </div>
+              );
+            })}
+          </div>
+        )}
+
+        {!loading && !error && !isQuCent && sections.map((sec, si) => (
           <div key={si} style={{ display: "flex", flexDirection: "column", gap: "16px" }}>
             {sections.length > 1 && (
               <div style={{ fontSize: "12px", color: "#c08552", fontWeight: 600 }}>
