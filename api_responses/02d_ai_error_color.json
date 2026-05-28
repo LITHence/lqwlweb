@@ -1,0 +1,24 @@
+{
+    "errorType": [
+        {
+            "level": 1,
+            "text": "1\u7ea7\uff1a\u8868\u8fbe\u4e2d\u65ad\u578b",
+            "color": "#FFC1C1"
+        },
+        {
+            "level": 2,
+            "text": "2\u7ea7\uff1a\u8bed\u4e49\u6b6a\u66f2\u578b",
+            "color": "#F4D98D"
+        },
+        {
+            "level": 3,
+            "text": "3\u7ea7\uff1a\u8868\u8fbe\u5f31\u6548\u578b",
+            "color": "#C1FFE6"
+        },
+        {
+            "level": 4,
+            "text": "4\u7ea7\uff1a\u4f18\u5316\u5efa\u8bae\u578b",
+            "color": "#C1E7FF"
+        }
+    ]
+}

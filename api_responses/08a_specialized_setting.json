@@ -1,0 +1,17 @@
+{
+    "mcq": {
+        "isTimeLimit": false,
+        "minute": 0,
+        "questionCount": 5
+    },
+    "frq": {
+        "isTimeLimit": false,
+        "minute": 0,
+        "questionCount": 1
+    },
+    "_id": "6a15904a5d7e83538dc6f84e",
+    "student": "687f35ec7e3e14071330f013",
+    "__v": 0,
+    "createdAt": "2026-05-26T12:21:30.405Z",
+    "updatedAt": "2026-05-26T12:21:30.405Z"
+}

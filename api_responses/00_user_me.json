@@ -1,0 +1,68 @@
+{
+    "_id": "687f39927e3e140713314af7",
+    "email": "15920987271",
+    "nickname": "",
+    "name": "\u5c39\u77e5\u884c",
+    "roll": [
+        {
+            "roll": "student",
+            "roll_id": "687f35ec7e3e14071330f013",
+            "school": "gw"
+        },
+        {
+            "roll": "jzkt",
+            "roll_id": "69a575e41aa2924b0b6fb4f1"
+        }
+    ],
+    "school": [
+        {
+            "name": "gw",
+            "_id": "687f39927e3e140713314af8"
+        },
+        {
+            "name": "gw",
+            "_id": "68802c617e3e140713564f94"
+        },
+        {
+            "name": "gw",
+            "_id": "69859a51f173987ac1070561"
+        }
+    ],
+    "phone": "15920987271",
+    "icon": "https://upload.sis.07future.com/userUpLoad/687f39927e3e140713314af7/N_kWJ41rp.png",
+    "roles": [],
+    "active": true,
+    "root": false,
+    "weComInfos": [],
+    "createdAt": "2025-07-22T07:11:14.939Z",
+    "updatedAt": "2026-03-12T06:11:31.571Z",
+    "__v": 1,
+    "organizations": [],
+    "studentList": [
+        {
+            "_id": "6a0c10d8b2d1dbafaf66f39b",
+            "name": "\u5c39\u77e5\u884c",
+            "phone": "15920987271",
+            "school": "gw",
+            "class": "\u9ad8\u4e00AL1\u73ed\u96c5\u601d",
+            "user": "687f39927e3e140713314af7",
+            "__v": 0
+        }
+    ],
+    "year": 2026,
+    "isFirst": false,
+    "schoolList": {
+        "gw": {
+            "name": "\u5e7f\u5dde\u5916\u56fd\u8bed\u5b66\u6821",
+            "fullName": "\u5e7f\u5dde\u5916\u56fd\u8bed\u5b66\u6821\u9752\u85e4\u4e4b\u6865AP&AL\u56fd\u9645\u8bfe\u7a0b\u4e2d\u5fc3",
+            "enName": "GZFLS",
+            "icon": "https://dep.07future.com/zz/logo.svg",
+            "location": "\u5e7f\u4e1c\u7701\uff0c\u5e7f\u5dde\u5e02"
+        },
+        "undefined": {
+            "name": "\u65e0",
+            "icon": "",
+            "location": "\u5e7f\u4e1c\u7701\uff0c\u5e7f\u5dde\u5e02"
+        }
+    }
+}

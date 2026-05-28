@@ -1,0 +1,600 @@
+{
+    "_id": "687f35ec7e3e14071330f013",
+    "name": "\u5c39\u77e5\u884c",
+    "gander": "Male",
+    "sid": "202531726",
+    "entranceDate": "2025-08-31T16:00:00.000Z",
+    "classYear": 2028,
+    "classNumber": "AL1",
+    "division": "\u9ad8\u4e2d",
+    "class_id": "686cc8011164320ec3852d3a",
+    "school": "gw",
+    "absence": false,
+    "studentTypes": [],
+    "className": "\u9ad8\u4e00AL1\u73ed",
+    "displayClassName": true,
+    "mac": "null|false|",
+    "padCheckTime": "2026-05-26T12:15:48.936Z",
+    "versionName": "7.6.3",
+    "icon": "https://upload.sis.07future.com/userUpLoad/687f39927e3e140713314af7/N_kWJ41rp.png",
+    "insider": true,
+    "is_yly": true,
+    "phone": "15920987271",
+    "user_id": "687f39927e3e140713314af7",
+    "update": {
+        "_id": "5f7464d20cb27b7cf5b192a4",
+        "versionCode": "7.6.3",
+        "force": true,
+        "url": "https://test.sis.07future.com/padapk/%E9%A2%86%E5%90%AF%E6%9C%AA%E6%9D%A57.6.3.apk",
+        "versionContent": "SP:\u9047\u5230\u4ec0\u4e48\u529f\u80fd\u95ee\u9898\u8bbe\u7f6e-\u53cd\u9988\u8054\u7cfb\u6211\uff0c\u6211\u80fd\u6536\u5230\u4f60\u4eec\u7684\u53cd\u9988\u6d88\u606f\n\u672c\u6b21\u66f4\u65b0\u5f3a\u5236\u5347\u7ea7\uff0c\u4e0d\u652f\u6301\u9000\u51fa\u9875\u9762\u540e\u53f0\u66f4\u65b0\uff0c\u8bf7\u8010\u5fc3\u4e0b\u8f7d\uff0c\u968f\u540e\u4e0b\u8f7d\u5b8c\u6210\u6309\u7167\u63d0\u793a\u70b9\u51fb\u5b89\u88c5\u4fbf\u53ef\n1.\u65b0\u589e\u5f55\u97f3\u673a\u5e94\u7528\n2.\u4fee\u590d\u90e8\u5206\u5df2\u77e5\u95ee\u9898",
+        "__v": 0,
+        "versionNumber": 249
+    },
+    "wordCompetition": {
+        "season": 18,
+        "tier": 1
+    },
+    "grade": {
+        "department": 1,
+        "grade": 1
+    },
+    "boxStudent": {
+        "_id": "68a2daab2662f99392fb01b5",
+        "name": "\u5c39\u77e5\u884c",
+        "gender": "Male",
+        "school": "\u5e7f\u5dde\u5916\u56fd\u8bed\u5b66\u6821",
+        "student": "687f35ec7e3e14071330f013",
+        "atCredits": 130,
+        "users": [
+            "61ab45cc5328e53553a4072d",
+            "687f39927e3e140713314af7"
+        ],
+        "appRules": [
+            {
+                "startTime": {
+                    "hour": 0,
+                    "minute": 0,
+                    "second": 0,
+                    "_id": "6a02da19bee023ca79d5d4c2"
+                },
+                "endTime": {
+                    "hour": 23,
+                    "minute": 59,
+                    "second": 59,
+                    "_id": "6a02da19bee023ca79d5d4c3"
+                },
+                "application": {
+                    "_id": "6969a23afd2d6efe1570ba30",
+                    "name": "Pasco",
+                    "type": "\u5de5\u5177",
+                    "androidPackageName": "com.isbx.pasco.Spark",
+                    "supportAtCredits": false,
+                    "supportFixedTime": true,
+                    "enable": true,
+                    "atCreditsPerMinute": 0,
+                    "appConstraintType": "whitelist",
+                    "school": "gw",
+                    "createdAt": "2026-01-16T02:28:10.487Z",
+                    "updatedAt": "2026-01-16T02:28:10.487Z",
+                    "__v": 0
+                },
+                "weekdays": [
+                    1,
+                    2,
+                    3,
+                    4,
+                    5,
+                    6,
+                    7
+                ],
+                "constraintGroup": "6969a5f1fd2d6efe1577c4f0",
+                "isEnable": true,
+                "setBy": "teacher",
+                "type": "whitelist",
+                "_id": "6a02da19bee023ca79d5d4c1"
+            },
+            {
+                "startTime": {
+                    "hour": 0,
+                    "minute": 0,
+                    "second": 0,
+                    "_id": "6a02da19bee023ca79d5d4c5"
+                },
+                "endTime": {
+                    "hour": 23,
+                    "minute": 59,
+                    "second": 59,
+                    "_id": "6a02da19bee023ca79d5d4c6"
+                },
+                "application": {
+                    "_id": "6969a228fd2d6efe1570b3de",
+                    "name": "\u8d5b\u7075\u683c\u901a\u7528",
+                    "type": "\u5de5\u5177",
+                    "androidPackageName": "an.qt.useJar",
+                    "supportAtCredits": false,
+                    "supportFixedTime": true,
+                    "enable": true,
+                    "atCreditsPerMinute": 0,
+                    "appConstraintType": "whitelist",
+                    "school": "gw",
+                    "createdAt": "2026-01-16T02:27:52.869Z",
+                    "updatedAt": "2026-01-16T02:27:52.869Z",
+                    "__v": 0
+                },
+                "weekdays": [
+                    1,
+                    2,
+                    3,
+                    4,
+                    5,
+                    6,
+                    7
+                ],
+                "constraintGroup": "6969a5f1fd2d6efe1577c4f0",
+                "isEnable": true,
+                "setBy": "teacher",
+                "type": "whitelist",
+                "_id": "6a02da19bee023ca79d5d4c4"
+            },
+            {
+                "startTime": {
+                    "hour": 0,
+                    "minute": 0,
+                    "second": 0,
+                    "_id": "6a02da19bee023ca79d5d4c8"
+                },
+                "endTime": {
+                    "hour": 23,
+                    "minute": 59,
+                    "second": 59,
+                    "_id": "6a02da19bee023ca79d5d4c9"
+                },
+                "application": {
+                    "_id": "6969a20ffd2d6efe157088fe",
+                    "name": "\u591a\u90bb\u56fd",
+                    "type": "\u5de5\u5177",
+                    "androidPackageName": "com.duolingo",
+                    "supportAtCredits": false,
+                    "supportFixedTime": true,
+                    "enable": true,
+                    "atCreditsPerMinute": 10,
+                    "appConstraintType": "whitelist",
+                    "school": "gw",
+                    "createdAt": "2026-01-16T02:27:27.818Z",
+                    "updatedAt": "2026-01-16T02:27:27.818Z",
+                    "__v": 0
+                },
+                "weekdays": [
+                    1,
+                    2,
+                    3,
+                    4,
+                    5,
+                    6,
+                    7
+                ],
+                "constraintGroup": "6969a5f1fd2d6efe1577c4f0",
+                "isEnable": true,
+                "setBy": "teacher",
+                "type": "whitelist",
+                "_id": "6a02da19bee023ca79d5d4c7"
+            },
+            {
+                "startTime": {
+                    "hour": 0,
+                    "minute": 0,
+                    "second": 0,
+                    "_id": "6a02da19bee023ca79d5d4cb"
+                },
+                "endTime": {
+                    "hour": 23,
+                    "minute": 59,
+                    "second": 59,
+                    "_id": "6a02da19bee023ca79d5d4cc"
+                },
+                "application": {
+                    "_id": "6969a1fbfd2d6efe15706d69",
+                    "name": "\u5fb7\u8bed\u52a9\u624b",
+                    "type": "\u5de5\u5177",
+                    "androidPackageName": "com.eusoft.dehelper",
+                    "supportAtCredits": false,
+                    "supportFixedTime": true,
+                    "enable": true,
+                    "atCreditsPerMinute": 0,
+                    "appConstraintType": "whitelist",
+                    "school": "gw",
+                    "createdAt": "2026-01-16T02:27:07.047Z",
+                    "updatedAt": "2026-01-16T02:27:07.047Z",
+                    "__v": 0
+                },
+                "weekdays": [
+                    1,
+                    2,
+                    3,
+                    4,
+                    5,
+                    6,
+                    7
+                ],
+                "constraintGroup": "6969a5f1fd2d6efe1577c4f0",
+                "isEnable": true,
+                "setBy": "teacher",
+                "type": "whitelist",
+                "_id": "6a02da19bee023ca79d5d4ca"
+            },
+            {
+                "startTime": {
+                    "hour": 0,
+                    "minute": 0,
+                    "second": 0,
+                    "_id": "6a02da19bee023ca79d5d4ce"
+                },
+                "endTime": {
+                    "hour": 23,
+                    "minute": 59,
+                    "second": 59,
+                    "_id": "6a02da19bee023ca79d5d4cf"
+                },
+                "application": {
+                    "_id": "6969a1d9fd2d6efe15704562",
+                    "name": "\u62fc\u8bcd\u4e4b\u661f",
+                    "type": "\u5de5\u5177",
+                    "androidPackageName": "com.uie.spellingstar",
+                    "supportAtCredits": false,
+                    "supportFixedTime": true,
+                    "enable": false,
+                    "atCreditsPerMinute": 0,
+                    "appConstraintType": "whitelist",
+                    "school": "gw",
+                    "createdAt": "2026-01-16T02:26:33.070Z",
+                    "updatedAt": "2026-04-09T06:25:56.276Z",
+                    "__v": 0
+                },
+                "weekdays": [
+                    1,
+                    2,
+                    3,
+                    4,
+                    5,
+                    6,
+                    7
+                ],
+                "constraintGroup": "6969a5f1fd2d6efe1577c4f0",
+                "isEnable": true,
+                "setBy": "teacher",
+                "type": "whitelist",
+                "_id": "6a02da19bee023ca79d5d4cd"
+            },
+            {
+                "startTime": {
+                    "hour": 0,
+                    "minute": 0,
+                    "second": 0,
+                    "_id": "6a02da19bee023ca79d5d4d1"
+                },
+                "endTime": {
+                    "hour": 23,
+                    "minute": 59,
+                    "second": 59,
+                    "_id": "6a02da19bee023ca79d5d4d2"
+                },
+                "application": {
+                    "_id": "6969a896fd2d6efe157cc966",
+                    "name": "JAVA",
+                    "type": "\u5de5\u5177",
+                    "androidPackageName": "com.xiaoyv.java",
+                    "supportAtCredits": false,
+                    "supportFixedTime": true,
+                    "enable": true,
+                    "atCreditsPerMinute": 0,
+                    "appConstraintType": "whitelist",
+                    "school": "gw",
+                    "createdAt": "2026-01-16T02:55:18.170Z",
+                    "updatedAt": "2026-01-16T02:55:18.170Z",
+                    "__v": 0
+                },
+                "weekdays": [
+                    1,
+                    2,
+                    3,
+                    4,
+                    5,
+                    6,
+                    7
+                ],
+                "constraintGroup": "6969a5f1fd2d6efe1577c4f0",
+                "isEnable": true,
+                "setBy": "teacher",
+                "type": "whitelist",
+                "_id": "6a02da19bee023ca79d5d4d0"
+            },
+            {
+                "startTime": {
+                    "hour": 0,
+                    "minute": 0,
+                    "second": 0,
+                    "_id": "6a02da19bee023ca79d5d4d4"
+                },
+                "endTime": {
+                    "hour": 23,
+                    "minute": 59,
+                    "second": 59,
+                    "_id": "6a02da19bee023ca79d5d4d5"
+                },
+                "application": {
+                    "_id": "69897207616d5edccff1755b",
+                    "name": "\u8054\u7f51\u95ee\u7b54",
+                    "type": "\u5de5\u5177",
+                    "androidPackageName": "https://sis.07future.com/chat/#/networkAI/",
+                    "supportAtCredits": false,
+                    "supportFixedTime": true,
+                    "enable": true,
+                    "atCreditsPerMinute": 0,
+                    "appConstraintType": "whitelist",
+                    "school": "gw",
+                    "createdAt": "2026-02-09T05:35:03.654Z",
+                    "updatedAt": "2026-02-09T05:35:03.654Z",
+                    "__v": 0
+                },
+                "weekdays": [
+                    1,
+                    2,
+                    3,
+                    4,
+                    5,
+                    6,
+                    7
+                ],
+                "constraintGroup": "6969a5f1fd2d6efe1577c4f0",
+                "isEnable": true,
+                "setBy": "teacher",
+                "type": "whitelist",
+                "_id": "6a02da19bee023ca79d5d4d3"
+            },
+            {
+                "startTime": {
+                    "hour": 0,
+                    "minute": 0,
+                    "second": 0,
+                    "_id": "6a02da19bee023ca79d5d4d7"
+                },
+                "endTime": {
+                    "hour": 23,
+                    "minute": 59,
+                    "second": 59,
+                    "_id": "6a02da19bee023ca79d5d4d8"
+                },
+                "application": {
+                    "_id": "698971f9616d5edccff174df",
+                    "name": "\u5199\u4f5c\u52a9\u624b",
+                    "type": "\u5de5\u5177",
+                    "androidPackageName": "https://sis.07future.com/chat#/applicationListNew/",
+                    "supportAtCredits": false,
+                    "supportFixedTime": true,
+                    "enable": true,
+                    "atCreditsPerMinute": 0,
+                    "appConstraintType": "whitelist",
+                    "school": "gw",
+                    "createdAt": "2026-02-09T05:34:49.487Z",
+                    "updatedAt": "2026-02-09T05:34:49.487Z",
+                    "__v": 0
+                },
+                "weekdays": [
+                    1,
+                    2,
+                    3,
+                    4,
+                    5,
+                    6,
+                    7
+                ],
+                "constraintGroup": "6969a5f1fd2d6efe1577c4f0",
+                "isEnable": true,
+                "setBy": "teacher",
+                "type": "whitelist",
+                "_id": "6a02da19bee023ca79d5d4d6"
+            },
+            {
+                "startTime": {
+                    "hour": 0,
+                    "minute": 0,
+                    "second": 0,
+                    "_id": "6a02da19bee023ca79d5d4da"
+                },
+                "endTime": {
+                    "hour": 23,
+                    "minute": 59,
+                    "second": 59,
+                    "_id": "6a02da19bee023ca79d5d4db"
+                },
+                "application": {
+                    "_id": "698971dc616d5edccff17474",
+                    "name": "WPS",
+                    "type": "\u5de5\u5177",
+                    "androidPackageName": "cn.wps.moffice_eng",
+                    "supportAtCredits": false,
+                    "supportFixedTime": true,
+                    "enable": true,
+                    "atCreditsPerMinute": 0,
+                    "appConstraintType": "whitelist",
+                    "school": "gw",
+                    "createdAt": "2026-02-09T05:34:20.868Z",
+                    "updatedAt": "2026-04-17T06:15:18.971Z",
+                    "__v": 0
+                },
+                "weekdays": [
+                    1,
+                    2,
+                    3,
+                    4,
+                    5,
+                    6,
+                    7
+                ],
+                "constraintGroup": "6969a5f1fd2d6efe1577c4f0",
+                "isEnable": true,
+                "setBy": "teacher",
+                "type": "whitelist",
+                "_id": "6a02da19bee023ca79d5d4d9"
+            },
+            {
+                "startTime": {
+                    "hour": 0,
+                    "minute": 0,
+                    "second": 0,
+                    "_id": "6a02da19bee023ca79d5d4dd"
+                },
+                "endTime": {
+                    "hour": 23,
+                    "minute": 59,
+                    "second": 59,
+                    "_id": "6a02da19bee023ca79d5d4de"
+                },
+                "application": {
+                    "_id": "698971bc616d5edccff173c1",
+                    "name": "\u8ba1\u7b97\u673a",
+                    "type": "\u5de5\u5177",
+                    "androidPackageName": "com.ddnapalon.calculator.gp",
+                    "supportAtCredits": false,
+                    "supportFixedTime": true,
+                    "enable": true,
+                    "atCreditsPerMinute": 0,
+                    "appConstraintType": "whitelist",
+                    "school": "gw",
+                    "createdAt": "2026-02-09T05:33:48.494Z",
+                    "updatedAt": "2026-02-09T05:33:48.494Z",
+                    "__v": 0
+                },
+                "weekdays": [
+                    1,
+                    2,
+                    3,
+                    4,
+                    5,
+                    6,
+                    7
+                ],
+                "constraintGroup": "6969a5f1fd2d6efe1577c4f0",
+                "isEnable": true,
+                "setBy": "teacher",
+                "type": "whitelist",
+                "_id": "6a02da19bee023ca79d5d4dc"
+            },
+            {
+                "startTime": {
+                    "hour": 0,
+                    "minute": 0,
+                    "second": 0,
+                    "_id": "6a02da19bee023ca79d5d4e0"
+                },
+                "endTime": {
+                    "hour": 23,
+                    "minute": 59,
+                    "second": 59,
+                    "_id": "6a02da19bee023ca79d5d4e1"
+                },
+                "application": {
+                    "_id": "69895850616d5edccff084a0",
+                    "name": "ClassIn",
+                    "type": "\u5de5\u5177",
+                    "androidPackageName": "cn.eeo.classin",
+                    "supportAtCredits": false,
+                    "supportFixedTime": true,
+                    "enable": false,
+                    "atCreditsPerMinute": 0,
+                    "appConstraintType": "whitelist",
+                    "school": "gw",
+                    "createdAt": "2026-02-09T03:45:20.201Z",
+                    "updatedAt": "2026-04-09T06:15:59.208Z",
+                    "__v": 0
+                },
+                "weekdays": [
+                    1,
+                    2,
+                    3,
+                    4,
+                    5,
+                    6,
+                    7
+                ],
+                "constraintGroup": "6969a5f1fd2d6efe1577c4f0",
+                "isEnable": true,
+                "setBy": "teacher",
+                "type": "whitelist",
+                "_id": "6a02da19bee023ca79d5d4df"
+            }
+        ],
+        "ocCount": 3,
+        "boxTeachers": [],
+        "teachTags": [],
+        "taskIds": [
+            1,
+            2,
+            3,
+            4,
+            5,
+            6,
+            7,
+            8,
+            9,
+            10,
+            11
+        ],
+        "pendingTaskIds": [
+            1,
+            2,
+            3,
+            4,
+            5,
+            6,
+            7,
+            8,
+            9
+        ],
+        "status": "\u5728\u8bfb",
+        "studyStatus": "\u6b63\u5e38",
+        "isAllowChangeWordSetting": true,
+        "exp": 11,
+        "humanisticLevel": 1,
+        "isSetPayPassword": true,
+        "showOC": 1,
+        "sysSchool": "gw",
+        "phone": "18620884099",
+        "createdAt": "2025-08-18T07:47:55.602Z",
+        "updatedAt": "2026-05-13T09:58:53.494Z",
+        "__v": 14,
+        "customers": [
+            "68b9972dcdd74e8291ecf5ac",
+            "69429a2dadf09e26ec33665c"
+        ],
+        "avatarUrl": "https://upload.sis.07future.com/userUpLoad/687f39927e3e140713314af7/N_kWJ41rp.png",
+        "bookList": [
+            "69c63f4188e3430f8a332073",
+            "69c6400188e3430f8a3320b1",
+            "69c6408a88e3430f8a3320ef",
+            "69c6410188e3430f8a332121",
+            "69c6417888e3430f8a33215f"
+        ],
+        "isBookListCompleted": false,
+        "isNoCustomerClue": false,
+        "imageUrl": "https://upload.sis.07future.com/userUpLoad/687f39927e3e140713314af7/pOwwAk1OS.png",
+        "bookListFirstAssignedAt": "2026-03-30T09:57:13.976Z",
+        "isAllowChangeSetting": true,
+        "saleCounselors": [
+            {
+                "_id": "63230cd6ebcdca6b3e426aba",
+                "name": "\u8c2d\u51e4\u537f",
+                "icon": "https://upload.sis.07future.com/userUpLoad/5cee25516a6bcc16f1329105/Yud6V2ivj.png"
+            }
+        ],
+        "nextLevelExp": 20
+    },
+    "readingLikeCount": 0,
+    "parents": [
+        {
+            "_id": "61ab45cc5328e53553a4072d",
+            "name": "\ud83d\udc20",
+            "icon": "https://thirdwx.qlogo.cn/mmopen/vi_32/POgEwh4mIHO4nibH0KlMECNjjGxQUq24ZEaGT4poC6icRiccVGKSyXwibcPq4BWmiaIGuG1icwxaQX6grC9VemZoJ8rg/132"
+        }
+    ]
+}

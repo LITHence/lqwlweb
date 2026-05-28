@@ -1,0 +1,69 @@
+[
+    {
+        "subject": "AP Calculus BC",
+        "levelCount": 110,
+        "my": {
+            "subject": "AP Calculus BC",
+            "star": 0,
+            "completeCount": 0,
+            "completed": false,
+            "lastUpdate": "2026-01-21T23:41:37.015Z",
+            "createDate": "2026-01-21T23:41:37.015Z"
+        }
+    },
+    {
+        "subject": "AP Microeconomics",
+        "levelCount": 33,
+        "my": {}
+    },
+    {
+        "subject": "AP Macroeconomics",
+        "levelCount": 42,
+        "my": {}
+    },
+    {
+        "subject": "AP Chemistry",
+        "levelCount": 85,
+        "my": {}
+    },
+    {
+        "subject": "AP Statistics",
+        "levelCount": 68,
+        "my": {}
+    },
+    {
+        "subject": "AP Psychology",
+        "levelCount": 71,
+        "my": {}
+    },
+    {
+        "subject": "AP Biology",
+        "levelCount": 65,
+        "my": {}
+    },
+    {
+        "subject": "AP Physics 1: Algebra-Based",
+        "levelCount": 38,
+        "my": {}
+    },
+    {
+        "subject": "AP Physics 2: Algebra-Based",
+        "levelCount": 48,
+        "my": {}
+    },
+    {
+        "subject": "AP Physics C: Electricity and Magnetism",
+        "levelCount": 19,
+        "my": {}
+    },
+    {
+        "subject": "AP Physics C: Mechanics",
+        "levelCount": 19,
+        "my": {}
+    },
+    {
+        "subject": "AP Computer Science A",
+        "levelCount": 56,
+        "my": {}
+    }
+]
