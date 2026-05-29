@@ -210,6 +210,9 @@ const createApi = (workerUrl, cookie) => {
     // 获取已保存答案
     getSavedAnswers: (instantId) =>
       get(`/api/quiz/getSaveAnswers?instant_id=${instantId}`),
+    // 已提交/已完成的作业详情（含答案 + 批改）
+    getQuizResult: (instantId) =>
+      get(`/api/quiz/quizResult/studyCore?instant_id=${instantId}`),
 
     // -- 管控分析（这些端点揭示了服务器下发的管控规则）--
     getAppRules: () => get("/api/black-box-application-constraint-groups"),
@@ -359,50 +362,57 @@ function JsonPreview({ data, maxHeight = "50vh" }) {
  * 4. 成功后保存到 localStorage 并进入主界面
  */
 function SetupScreen({ onComplete }) {
-  // useState 返回 [当前值, 设置函数]
-  // localStorage.getItem 在首次渲染时读取之前保存的值（如果有的话）
   const [workerUrl, setWorkerUrl] = useState(localStorage.getItem("lqwl_worker") || "");
   const [sessionInput, setSessionInput] = useState(localStorage.getItem("lqwl_session_raw") || "");
   const [testing, setTesting] = useState(false);
   const [result, setResult] = useState(null);
+  const [mode, setMode] = useState("login"); // "login" | "manual"
+  const [account, setAccount] = useState("");
+  const [password, setPassword] = useState("");
+  const [sn, setSn] = useState(localStorage.getItem("lqwl_sn") || "");
 
-  /**
-   * 测试连接
-   * 1. 把用户输入解析成标准 cookie 格式
-   * 2. 发一个 /api/v2/users/me 请求
-   * 3. 如果返回 200 + 用户数据，说明 cookie 有效
-   */
-  const handleTest = async () => {
-    setTesting(true);
-    setResult(null);
+  // 账号密码登录
+  const handleLogin = async () => {
+    setTesting(true); setResult(null);
     try {
-      const url = workerUrl.replace(/\/$/, ""); // 去掉末尾的 /
-      const cookie = parseCookieInput(sessionInput);
-
-      const res = await fetch(`${url}/api/v2/users/me`, {
-        headers: { "Content-Type": "application/json", "X-LQ-Cookie": cookie },
+      const url = workerUrl.replace(/\/$/, "");
+      const res = await fetch(`${url}/api/auth`, {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({
+          email: account,
+          password: password,
+          sn: sn,
+        }),
       });
+      // 从 Worker 转发的 set-cookie 中提取 sessionID
+      const newCookie = res.headers.get("X-LQ-New-Cookie");
+      const body = await res.json();
 
-      if (res.ok) {
-        const data = await res.json();
-        // 保存到 localStorage（浏览器关闭后还在）
+      if (res.ok && newCookie) {
+        const match = newCookie.match(/sessionID=([^;]+)/);
+        const cookieVal = match ? `sessionID=${match[1]}` : newCookie;
         localStorage.setItem("lqwl_worker", url);
-        localStorage.setItem("lqwl_cookie", cookie);
-        localStorage.setItem("lqwl_session_raw", sessionInput);
+        localStorage.setItem("lqwl_cookie", cookieVal);
+        localStorage.setItem("lqwl_sn", sn);
         setResult({
           ok: true,
-          name: data.name || data.username || data.realName || "已连接",
-          data,
+          name: body.name || body.realName || body.username || account,
+          cookie: cookieVal,
         });
+      } else if (res.ok && !newCookie) {
+        // 有的服务器在 body 里返回 token
+        const token = body.token || body.sessionID || body.session;
+        if (token) {
+          const cookieVal = token.startsWith("sessionID=") ? token : `sessionID=${token}`;
+          localStorage.setItem("lqwl_worker", url);
+          localStorage.setItem("lqwl_cookie", cookieVal);
+          setResult({ ok: true, name: body.name || account, cookie: cookieVal });
+        } else {
+          setResult({ ok: false, msg: "登录成功但未获取到 session，请检查 Worker 是否转发了 set-cookie header" });
+        }
       } else {
-        setResult({
-          ok: false,
-          msg: `HTTP ${res.status} — ${
-            res.status === 401
-              ? "Session 已过期，需要重新从平板提取"
-              : "请检查 Worker URL"
-          }`,
-        });
+        setResult({ ok: false, msg: body.message || body.error || `HTTP ${res.status}` });
       }
     } catch (e) {
       setResult({ ok: false, msg: e.message });
@@ -410,111 +420,144 @@ function SetupScreen({ onComplete }) {
     setTesting(false);
   };
 
-  // ---- 输入框的通用样式（复用） ----
+  // 手动 session 测试
+  const handleTest = async () => {
+    setTesting(true); setResult(null);
+    try {
+      const url = workerUrl.replace(/\/$/, "");
+      const cookie = parseCookieInput(sessionInput);
+      const res = await fetch(`${url}/api/v2/users/me`, {
+        headers: { "Content-Type": "application/json", "X-LQ-Cookie": cookie },
+      });
+      if (res.ok) {
+        const data = await res.json();
+        localStorage.setItem("lqwl_worker", url);
+        localStorage.setItem("lqwl_cookie", cookie);
+        localStorage.setItem("lqwl_session_raw", sessionInput);
+        setResult({ ok: true, name: data.name || data.username || data.realName || "已连接", cookie });
+      } else {
+        setResult({ ok: false, msg: `HTTP ${res.status} — ${res.status === 401 ? "Session 已过期" : "请检查 Worker URL"}` });
+      }
+    } catch (e) { setResult({ ok: false, msg: e.message }); }
+    setTesting(false);
+  };
+
   const inputStyle = {
     width: "100%", padding: "12px 14px",
-    background: "var(--bg3)",
-    border: "1px solid var(--border)",
-    borderRadius: "10px", color: "#fff", fontSize: "13px",
-    outline: "none", boxSizing: "border-box",
-    fontFamily: "var(--font)",
+    background: "var(--bg3)", border: "1px solid var(--border)",
+    borderRadius: "10px", color: "var(--text)", fontSize: "13px",
+    outline: "none", boxSizing: "border-box", fontFamily: "var(--font)",
   };
+  const tabBtn = (active) => ({
+    flex: 1, padding: "10px", border: "none", borderRadius: "8px",
+    background: active ? "rgba(192,133,82,0.12)" : "transparent",
+    color: active ? "#c08552" : "var(--text3)",
+    fontWeight: active ? 600 : 400, fontSize: "13px",
+    cursor: "pointer", fontFamily: "var(--font)",
+    transition: "all 0.15s",
+  });
 
   return (
     <div style={{
       minHeight: "100vh", display: "flex", alignItems: "center", justifyContent: "center",
-      background: "#0a0a0f",
-      fontFamily: "var(--font-mono)", color: "var(--text)",
+      background: "#111114", fontFamily: "var(--font)", color: "var(--text)",
     }}>
+      <style>{`
+        :root {
+          --bg: #111114; --bg2: #1a1a1e; --bg3: #222226;
+          --border: rgba(255,255,255,0.08); --text: #d8d8d8;
+          --text2: #888; --text3: #555; --accent: #c08552;
+          --font: -apple-system, 'SF Pro Display', 'Helvetica Neue', sans-serif;
+          --font-mono: 'SF Mono', 'Menlo', 'Consolas', monospace;
+        }
+        * { box-sizing: border-box; }
+      `}</style>
       <div style={{
-        width: "min(500px, 90vw)",
-        background: "var(--bg3)",
-        border: "1px solid var(--border)",
-        borderRadius: "16px", padding: "36px 28px",
+        width: "min(440px, 90vw)", background: "var(--bg2)",
+        border: "1px solid var(--border)", borderRadius: "16px", padding: "32px 24px",
       }}>
-        {/* 标题 */}
-        <div style={{ textAlign: "center", marginBottom: "32px" }}>
-          <div style={{
-            fontSize: "28px", fontWeight: 700, letterSpacing: "-1px",
-            color: "#c08552", marginBottom: "6px",
-          }}>LQWL Freedom</div>
-          <div style={{ fontSize: "12px", color: "var(--text3)", letterSpacing: "2px" }}>
-            领启未来 · 自由门户
-          </div>
+        <div style={{ textAlign: "center", marginBottom: "24px" }}>
+          <div style={{ fontSize: "24px", fontWeight: 700, color: "#c08552", marginBottom: "4px" }}>领启门户</div>
+          <div style={{ fontSize: "12px", color: "var(--text3)" }}>LQWL Freedom</div>
         </div>
 
-        {/* Worker URL 输入 */}
-        <div style={{ marginBottom: "18px" }}>
-          <label style={{
-            fontSize: "11px", color: "var(--text2)", textTransform: "uppercase",
-            letterSpacing: "1px", display: "block", marginBottom: "6px",
-          }}>Worker URL</label>
-          <input
-            value={workerUrl}
-            onChange={(e) => setWorkerUrl(e.target.value)}
-            placeholder="https://lqwl-proxy.xxx.workers.dev"
-            style={inputStyle}
-          />
+        {/* Worker URL — 两种模式都需要 */}
+        <div style={{ marginBottom: "16px" }}>
+          <label style={{ fontSize: "11px", color: "var(--text3)", display: "block", marginBottom: "5px" }}>Worker 地址</label>
+          <input value={workerUrl} onChange={e => setWorkerUrl(e.target.value)}
+            placeholder="https://lqwl-proxy.lithenced.workers.dev" style={inputStyle} />
           <div style={{ fontSize: "11px", color: "var(--text3)", marginTop: "4px" }}>
-            Cloudflare Worker 代理地址（cd worker && npx wrangler deploy 后获得）
+            不知道填什么？直接填 <span style={{ color: "#c08552", cursor: "pointer" }}
+              onClick={() => setWorkerUrl("https://lqwl-proxy.lithenced.workers.dev")}
+            >https://lqwl-proxy.lithenced.workers.dev</span>
           </div>
         </div>
 
-        {/* Session ID 输入 */}
-        <div style={{ marginBottom: "24px" }}>
-          <label style={{
-            fontSize: "11px", color: "var(--text2)", textTransform: "uppercase",
-            letterSpacing: "1px", display: "block", marginBottom: "6px",
-          }}>Session ID</label>
-          <textarea
-            value={sessionInput}
-            onChange={(e) => setSessionInput(e.target.value)}
-            placeholder={"粘贴以下任意格式:\nsessionID=s%3A07jC07L2b8...\n或只粘贴值:\ns%3A07jC07L2b8..."}
-            rows={3}
-            style={{ ...inputStyle, resize: "vertical" }}
-          />
-          <div style={{ fontSize: "11px", color: "var(--text3)", marginTop: "4px", lineHeight: "1.6" }}>
-            从平板提取：<code style={{ color: "#c08552" }}>bash extract_cookie.sh</code>
-            <br />
-            存储位置：<code style={{ color: "#c08552" }}>
-              okgo_cookie.xml → Java 序列化 → hex 解码
-            </code>
-          </div>
+        {/* 模式切换 */}
+        <div style={{ display: "flex", gap: "4px", marginBottom: "16px", background: "var(--bg3)", borderRadius: "10px", padding: "3px" }}>
+          <button onClick={() => { setMode("login"); setResult(null); }} style={tabBtn(mode === "login")}>账号登录</button>
+          <button onClick={() => { setMode("manual"); setResult(null); }} style={tabBtn(mode === "manual")}>手动配置</button>
         </div>
 
-        {/* 解析预览：让用户看到实际会发送什么 */}
-        {sessionInput.trim() && (
-          <div style={{
-            marginBottom: "18px", padding: "10px 14px",
-            background: "rgba(192,133,82,0.04)",
-            border: "1px solid rgba(192,133,82,0.1)",
-            borderRadius: "8px", fontSize: "11px", color: "#c08552",
-            wordBreak: "break-all",
-          }}>
-            <span style={{ color: "var(--text2)" }}>将发送: </span>
-            Cookie: {parseCookieInput(sessionInput)}
-          </div>
+        {/* 登录模式 */}
+        {mode === "login" && (
+          <>
+            <div style={{ marginBottom: "12px" }}>
+              <label style={{ fontSize: "11px", color: "var(--text3)", display: "block", marginBottom: "5px" }}>手机号</label>
+              <input value={account} onChange={e => setAccount(e.target.value)}
+                placeholder="手机号" style={inputStyle} />
+            </div>
+            <div style={{ marginBottom: "12px" }}>
+              <label style={{ fontSize: "11px", color: "var(--text3)", display: "block", marginBottom: "5px" }}>密码</label>
+              <input type="password" value={password} onChange={e => setPassword(e.target.value)}
+                placeholder="••••••" style={inputStyle} />
+            </div>
+            <div style={{ marginBottom: "20px" }}>
+              <label style={{ fontSize: "11px", color: "var(--text3)", display: "block", marginBottom: "5px" }}>SN 码（平板序列号）</label>
+              <input value={sn} onChange={e => setSn(e.target.value)}
+                placeholder="LQXXXXX" style={inputStyle}
+                onKeyDown={e => { if (e.key === "Enter" && account && password && workerUrl && sn) handleLogin(); }} />
+              <div style={{ fontSize: "11px", color: "var(--text3)", marginTop: "4px" }}>
+                平板背面或设置 → 关于中查看，格式如 LQXXXXX
+              </div>
+            </div>
+            <button onClick={handleLogin} disabled={testing || !workerUrl || !account || !password || !sn}
+              style={{
+                width: "100%", padding: "13px", border: "none", borderRadius: "10px",
+                background: testing ? "#222" : "#c08552", cursor: testing ? "wait" : "pointer",
+                color: testing ? "var(--text3)" : "#111", fontSize: "14px", fontWeight: 700,
+                fontFamily: "var(--font)", opacity: (!workerUrl || !account || !password || !sn) ? 0.3 : 1,
+              }}>
+              {testing ? "登录中…" : "登录"}
+            </button>
+          </>
         )}
 
-        {/* 测试按钮 */}
-        <button
-          onClick={handleTest}
-          disabled={testing || !workerUrl || !sessionInput}
-          style={{
-            width: "100%", padding: "13px", border: "none", borderRadius: "10px",
-            background: testing ? "#222" : "#c08552",
-            cursor: testing ? "wait" : "pointer",
-            color: testing ? "#888" : "#0a0a0f",
-            fontSize: "13px", fontWeight: 700, letterSpacing: "0.5px",
-            fontFamily: "var(--font)",
-            opacity: (!workerUrl || !sessionInput) ? 0.3 : 1,
-            transition: "all 0.2s",
-          }}
-        >
-          {testing ? "连接中..." : "测试连接"}
-        </button>
+        {/* 手动模式 */}
+        {mode === "manual" && (
+          <>
+            <div style={{ marginBottom: "20px" }}>
+              <label style={{ fontSize: "11px", color: "var(--text3)", display: "block", marginBottom: "5px" }}>Session ID</label>
+              <textarea value={sessionInput} onChange={e => setSessionInput(e.target.value)}
+                placeholder="sessionID=s%3A07jC07..." rows={3}
+                style={{ ...inputStyle, resize: "vertical" }} />
+              <div style={{ fontSize: "11px", color: "var(--text3)", marginTop: "4px" }}>
+                从平板提取: <code style={{ color: "#c08552" }}>bash extract_cookie.sh</code>
+              </div>
+            </div>
+            <button onClick={handleTest} disabled={testing || !workerUrl || !sessionInput}
+              style={{
+                width: "100%", padding: "13px", border: "none", borderRadius: "10px",
+                background: testing ? "#222" : "#c08552", cursor: testing ? "wait" : "pointer",
+                color: testing ? "var(--text3)" : "#111", fontSize: "14px", fontWeight: 700,
+                fontFamily: "var(--font)", opacity: (!workerUrl || !sessionInput) ? 0.3 : 1,
+              }}>
+              {testing ? "连接中…" : "测试连接"}
+            </button>
+          </>
+        )}
 
-        {/* 测试结果 */}
+        {/* 结果 */}
         {result && (
           <div style={{
             marginTop: "16px", padding: "14px", borderRadius: "10px", fontSize: "13px",
@@ -524,21 +567,14 @@ function SetupScreen({ onComplete }) {
           }}>
             {result.ok ? (
               <>
-                <div style={{ marginBottom: "10px" }}>✓ 连接成功 — {result.name}</div>
-                <button
-                  onClick={() => onComplete(
-                    workerUrl.replace(/\/$/, ""),
-                    parseCookieInput(sessionInput)
-                  )}
+                <div style={{ marginBottom: "10px" }}>✓ {mode === "login" ? "登录成功" : "连接成功"} — {result.name}</div>
+                <button onClick={() => onComplete(workerUrl.replace(/\/$/, ""), result.cookie)}
                   style={{
-                    width: "100%", padding: "10px",
-                    background: "rgba(192,133,82,0.12)",
-                    border: "1px solid rgba(192,133,82,0.25)",
-                    borderRadius: "8px", color: "#c08552",
-                    cursor: "pointer", fontSize: "13px", fontWeight: 600,
+                    width: "100%", padding: "10px", background: "rgba(192,133,82,0.12)",
+                    border: "1px solid rgba(192,133,82,0.25)", borderRadius: "8px",
+                    color: "#c08552", cursor: "pointer", fontSize: "13px", fontWeight: 600,
                     fontFamily: "var(--font)",
-                  }}
-                >
+                  }}>
                   进入门户 →
                 </button>
               </>
@@ -927,24 +963,40 @@ function QuizWorkspace({ quiz, api, onClose, onSubmitted }) {
 
   const instantId = quiz._id;
   const isQuCent = (quiz.type || "").startsWith("quCent");
+  const wasSubmitted = quiz.status === "2" || quiz.status === "3";
 
   // 加载题目
   useEffect(() => {
     (async () => {
       try {
         setLoading(true);
-        const data = isQuCent
-          ? await api.getQuCentContent(instantId)
-          : await api.getQuizContent(instantId);
+        let data;
+        if (wasSubmitted) {
+          // 已提交/已完成 → 用 quizResult 拉取（含答案+批改）
+          data = await api.getQuizResult(instantId);
+        } else if (isQuCent) {
+          data = await api.getQuCentContent(instantId);
+        } else {
+          data = await api.getQuizContent(instantId);
+        }
         setContent(data);
-        // 预填已保存答案
-        if (isQuCent && Array.isArray(data.answers)) {
+        // 预填答案
+        if (Array.isArray(data.answers) && data.answers.length > 0) {
           const pre = {};
           data.answers.forEach(a => {
-            pre[a.cIndex] = { answerKey: (a.answerKeys || []).join("\n"), fileList: a.fileList || [] };
+            const key = a.cIndex || a.content;
+            if (key) {
+              pre[key] = {
+                answerKey: a.answerKey || (a.answerKeys || []).join("\n"),
+                fileList: a.fileList || [],
+                grade: a.grade,
+                comment: a.comment || a.commentText || "",
+                hasGraded: a.hasGraded,
+              };
+            }
           });
           setAnswers(pre);
-        } else if (data.savedAnswers) {
+        } else if (data.savedAnswers && typeof data.savedAnswers === "object") {
           const pre = {};
           for (const [cid, ans] of Object.entries(data.savedAnswers)) {
             pre[cid] = { answerKey: ans.answerKey || "", fileList: ans.fileList || [] };
@@ -957,7 +1009,7 @@ function QuizWorkspace({ quiz, api, onClose, onSubmitted }) {
         setLoading(false);
       }
     })();
-  }, [instantId, api, isQuCent]);
+  }, [instantId, api, isQuCent, wasSubmitted]);
 
   // 保存单题
   const saveOne = async (contentId) => {
@@ -1176,6 +1228,26 @@ function QuizWorkspace({ quiz, api, onClose, onSubmitted }) {
                       ))}
                     </div>
                   )}
+                  {isSubmitted && (ans.hasGraded || ans.grade != null || ans.comment) && (
+                    <div style={{
+                      marginTop: "10px", padding: "10px 12px",
+                      background: "var(--bg3)", borderRadius: "8px",
+                      border: "1px solid var(--border)", fontSize: "12px",
+                    }}>
+                      {ans.grade != null && (
+                        <div style={{ marginBottom: "4px" }}>
+                          <span style={{ color: "var(--text3)" }}>得分　</span>
+                          <span style={{ color: "var(--accent)", fontWeight: 600 }}>{ans.grade}/{q.maxScore}</span>
+                        </div>
+                      )}
+                      {ans.comment && (
+                        <div>
+                          <span style={{ color: "var(--text3)" }}>评语　</span>
+                          <span style={{ color: "var(--text)" }}>{ans.comment}</span>
+                        </div>
+                      )}
+                    </div>
+                  )}
                   {!isSubmitted && (
                     <div style={{ display: "flex", gap: "8px", marginTop: "12px" }}>
                       <button onClick={() => saveOne(cid)} disabled={saving} style={sty.btn("#c08552", saving)}>
@@ -1316,6 +1388,28 @@ function QuizWorkspace({ quiz, api, onClose, onSubmitted }) {
                     </div>
                   )}
 
+                  {/* 批改信息 */}
+                  {isSubmitted && (ans.hasGraded || ans.grade != null || ans.comment) && (
+                    <div style={{
+                      marginTop: "10px", padding: "10px 12px",
+                      background: "var(--bg3)", borderRadius: "8px",
+                      border: "1px solid var(--border)", fontSize: "12px",
+                    }}>
+                      {ans.grade != null && (
+                        <div style={{ marginBottom: "4px" }}>
+                          <span style={{ color: "var(--text3)" }}>得分　</span>
+                          <span style={{ color: "var(--accent)", fontWeight: 600 }}>{ans.grade}</span>
+                        </div>
+                      )}
+                      {ans.comment && (
+                        <div>
+                          <span style={{ color: "var(--text3)" }}>评语　</span>
+                          <span style={{ color: "var(--text)" }}>{ans.comment}</span>
+                        </div>
+                      )}
+                    </div>
+                  )}
+
                   {/* 操作按钮 */}
                   {!isSubmitted && (
                     <div style={{ display: "flex", gap: "8px", marginTop: "12px", alignItems: "center" }}>
@@ -1351,9 +1445,20 @@ function QuizWorkspace({ quiz, api, onClose, onSubmitted }) {
 
         {/* 已提交状态 */}
         {!loading && !error && isSubmitted && (
-          <div style={{ ...sty.card, borderColor: "rgba(34,211,238,0.12)", background: "rgba(34,211,238,0.03)", textAlign: "center" }}>
-            <div style={{ fontSize: "14px", color: "#22d3ee", fontWeight: 600 }}>✓ 已提交</div>
-            {content?.feedback && <div style={{ fontSize: "12px", color: "var(--text2)", marginTop: "6px" }}>反馈: {content.feedback}</div>}
+          <div style={{ ...sty.card, borderColor: "rgba(34,211,238,0.12)", background: "rgba(34,211,238,0.03)" }}>
+            <div style={{ fontSize: "14px", color: "#22d3ee", fontWeight: 600, marginBottom: "8px" }}>✓ 已提交</div>
+            {content?.grade != null && content.grade >= 0 && (
+              <div style={{ fontSize: "13px", color: "var(--text)", marginBottom: "4px" }}>
+                总分: <strong>{content.grade}</strong> / {content?.quiz?.maxGrade || 100}
+                {content.hasGraded ? " (已批改)" : " (待批改)"}
+              </div>
+            )}
+            {content?.feedback && <div style={{ fontSize: "12px", color: "var(--text2)" }}>反馈: {content.feedback}</div>}
+            {content?.submitTime && (
+              <div style={{ fontSize: "11px", color: "var(--text3)", marginTop: "4px" }}>
+                提交于 {new Date(content.submitTime).toLocaleString("zh-CN")}
+              </div>
+            )}
           </div>
         )}
       </div>
@@ -1793,7 +1898,7 @@ function QuizPanel({ quizData, loading, error, onRefresh, api }) {
                     <span style={{ color: "var(--text3)" }}>ID　</span>
                     <span style={{ color: "var(--text3)", fontSize: "10px" }}>{r._id}</span>
                   </div>
-                  {/* 作答按钮 */}
+                  {/* 作答/查看按钮 */}
                   {(r.status === "0" || r.status === "1") && (
                     <div style={{ gridColumn: "1 / -1", marginTop: "4px" }}>
                       <button
@@ -1807,6 +1912,22 @@ function QuizPanel({ quizData, loading, error, onRefresh, api }) {
                         }}
                       >
                         {r.status === "0" ? "开始作答" : "继续作答"} →
+                      </button>
+                    </div>
+                  )}
+                  {(r.status === "2" || r.status === "3") && (
+                    <div style={{ gridColumn: "1 / -1", marginTop: "4px" }}>
+                      <button
+                        onClick={(e) => { e.stopPropagation(); setActiveQuiz(r); }}
+                        style={{
+                          width: "100%", padding: "10px", borderRadius: "8px",
+                          background: "var(--bg3)",
+                          border: "1px solid var(--border)",
+                          color: "var(--text2)", fontSize: "13px", fontWeight: 500,
+                          cursor: "pointer", fontFamily: "var(--font)",
+                        }}
+                      >
+                        查看详情 →
                       </button>
                     </div>
                   )}
